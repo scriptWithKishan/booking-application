@@ -13,6 +13,10 @@ AuthRouter.post('/signup', async (req, res) => {
   try {
     const { username, password } = req.body
 
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and Password are required!" })
+    }
+
     const user = await User.findOne({ username })
 
     if (user) {
@@ -32,8 +36,9 @@ AuthRouter.post('/signup', async (req, res) => {
       message: "User created successfully"
     })
   } catch (err) {
+    console.log("Server Error", err.message)
     return res.status(500).json({
-      message: `Server Error: ${err.message}`
+      message: `Server Error!`
     })
   }
 })
@@ -43,10 +48,16 @@ AuthRouter.post('/login', async (req, res) => {
     const jwtSecret = process.env.JWT_SECRET
     const { username, password } = req.body
 
-    const user = await User.findOne({ username })
+    if (!username || !password) {
+      return res.status(400).json({
+        message: "Username and Password are requried!"
+      })
+    }
+
+    const user = await User.findOne({ username }).select('+password')
 
     if (!user) {
-      return res.status(404).json({
+      return res.status(401).json({
         message: "Invalid Credentials!"
       })
     }
@@ -65,7 +76,7 @@ AuthRouter.post('/login', async (req, res) => {
     const comparedPassword = await bcrypt.compare(password, user.password)
 
     if (!comparedPassword) {
-      return res.status(400).json({
+      return res.status(401).json({
         message: "Invalid Credentials!"
       })
     }
@@ -79,8 +90,9 @@ AuthRouter.post('/login', async (req, res) => {
       token
     })
   } catch (err) {
+    console.log("Server Error! ", err.message)
     return res.status(500).json({
-      message: `Server Error: ${err.message}`
+      message: `Server Error!`
     })
   }
 })
@@ -102,8 +114,9 @@ AuthRouter.post('/logout', AuthMiddleware, async (req, res) => {
       message: "Logged out successfully!"
     })
   } catch (err) {
+    console.log("Server Error! ", err.message)
     return res.status(500).json({
-      message: `Server Error: ${err.message}`
+      message: `Server Error!`
     })
   }
 })

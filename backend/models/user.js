@@ -9,12 +9,13 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    select: false
   },
   token: {
     type: String,
     default: null
   }
-}, {timestamps: true})
+}, { timestamps: true })
 
 const User = mongoose.model("User", userSchema)
 

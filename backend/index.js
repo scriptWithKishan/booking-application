@@ -10,14 +10,10 @@ dotenv.config()
 
 
 // MongoDB connection
-const MONGO_URI = process.env.MONGODB_URI
-
-console.log(MONGO_URI)
-
-mongoose.connect(MONGO_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((error) => console.log(error))
-
+const mongoUrl = process.env.MONGODB_URI
+if (!mongoUrl) {
+  throw new Error("Missing MONGODB_URI environment variable")
+}
 
 // Routes
 
@@ -35,4 +31,12 @@ app.use((req, res) => {
 // Running the server
 const PORT = process.env.PORT || 3000
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+mongoose.connect(mongoUrl)
+  .then(() => {
+    console.log("Connected to MongoDB")
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+  })
+  .catch((error) => {
+    console.log("MongoDB connection Error", error.message)
+    process.exit(1)
+  })
