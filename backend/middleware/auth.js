@@ -19,15 +19,14 @@ const AuthMiddleware = async (req, res, next) => {
       })
     }
 
-    const [, token] = authHeader.split(" ")
+    const token = authHeader.split(" ")[1]
+    const decoded = jwt.verify(token, jwtSecret)
 
-    if (!token) {
+    if (!decoded.id) {
       return res.status(401).json({
         message: "Authorization Failure!"
       })
     }
-
-    const decoded = jwt.verify(token, jwtSecret)
 
     const user = await User.findById(decoded.id).select('-password')
 
